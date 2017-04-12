@@ -1,0 +1,62 @@
+var app = angular.module('myapp',['ngRoute']);
+app.config(function($routeProvider){
+	$routeProvider.when('/login',{
+	     templateUrl:'login.html',
+	     controller:'logincontroller'
+	})
+	.when('/home',{
+	     templateUrl:'home.html',
+	     controller:'homecontroller',
+	})
+	.otherwise({redirectTo:'/login'});
+	
+});
+
+app.controller('logincontroller',['$scope','$window','$location','$http','$rootScope',function($scope,$window,$location,$http,$rootScope){
+	//$scope.logoutuser = $rootScope.loguser.username;
+	$scope.login = function(){
+		var username = $scope.username;
+		var password = $scope.password;
+		var loginuser = {"username":username,"password":password};
+		$http.post('/login',loginuser)
+		.success(function(rep){
+			if(rep==='success'){
+				$location.path('/home');
+			}
+			console.log(rep);
+		})
+	};
+
+}]);
+
+app.controller('homecontroller',['$scope','$window','$location','$http','$rootScope',function($scope,$window,$location,$http,$rootScope){
+	$http.get('/isloggedin')
+	.success(function(rep){
+		if(!rep){
+			$location.path('/login');
+		}else{
+			$scope.username = rep.username;
+			$scope.password = rep.password;
+			$rootScope.loguser = rep;
+		}
+	});
+
+	$scope.logout = function(){
+		$http.get('/logout')
+		.success(function(rep){
+			if(rep==='successful'){
+				$location.path('/login');
+			}
+		})
+	};
+	
+	$scope.edit = function(){
+		$http.post('/edit',{"password":$scope.password})
+		.success(function(rep){
+			
+		})
+	}
+	
+	
+	
+}]);
