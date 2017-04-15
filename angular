@@ -8,16 +8,28 @@ app.config(function($routeProvider){
 	     templateUrl:'home.html',
 	     controller:'homecontroller',
 	})
+	.when('/signup',{
+	     templateUrl:'signup.html',
+	     controller:'signcontroller',
+	})
+	.when('/editstudent',{
+	     templateUrl:'editstudent.html',
+	     controller:'editstudentcontroller',
+	})
+	.when('/studentinfo',{
+	     templateUrl:'studentinfo.html',
+	     controller:'studentinfocontroller',
+	})
+
 	.otherwise({redirectTo:'/login'});
 	
 });
 
-app.controller('logincontroller',['$scope','$window','$location','$http','$rootScope',function($scope,$window,$location,$http,$rootScope){
-	//$scope.logoutuser = $rootScope.loguser.username;
+app.controller('logincontroller',['$scope','$location','$http','$rootScope',function($scope,$location,$http,$rootScope){
 	$scope.login = function(){
-		var username = $scope.username;
+		var name = $scope.name;
 		var password = $scope.password;
-		var loginuser = {"username":username,"password":password};
+		var loginuser = {"name":name,"password":password};
 		$http.post('/login',loginuser)
 		.success(function(rep){
 			if(rep==='success'){
@@ -29,18 +41,73 @@ app.controller('logincontroller',['$scope','$window','$location','$http','$rootS
 
 }]);
 
-app.controller('homecontroller',['$scope','$window','$location','$http','$rootScope',function($scope,$window,$location,$http,$rootScope){
+app.controller('signcontroller',['$scope','$location','$http','$rootScope',function($scope,$location,$http,$rootScope){
+	$scope.signup = function(){
+
+		var name = $scope.name;
+		var password = $scope.password;
+		var newstudent = {"username":name,"password":password};
+		$http.post('/signup',newstudent)
+		.success(function(rep){
+			if(rep==='success'){
+				$location.path('/login');
+			}
+			console.log(rep);
+		})
+	}
+
+}]);
+
+app.controller('homecontroller',['$scope','$location','$http','$rootScope',function($scope,$location,$http,$rootScope){
 	$http.get('/isloggedin')
 	.success(function(rep){
 		if(!rep){
 			$location.path('/login');
 		}else{
-			$scope.username = rep.username;
+			$scope.adminname = rep.username;
 			$scope.password = rep.password;
-			$rootScope.loguser = rep;
 		}
 	});
+	
+	$scope.view = function(index){
+		var name = $scope.allstudent[index].name;
+		var studentname = {"name":name};
+		$http.post('/studentinfo',studentname)
+		.success(function(rep){
+	            //console.log(rep);
+			    $scope.student =rep;
+				$rootScope.student = $scope.student; 
+	            $location.path('/studentinfo');
+			
+		});
+		
+		
+	}
+	
+	$scope.search = function(){
+	var showbatch = document.getElementById("batch").value;
+	var allstudents = {"name":"name","batch":showbatch};
+	$http.post('/allinfo',allstudents)
+	.success(function(rep){
+		//alert(rep.name);
+		    //console.log(rep);
+	
 
+			
+			rep.forEach(function(item){
+				item.average = (parseInt(item.score1)+parseInt(item.score2)+parseInt(item.score3))/3;
+			})
+			$scope.allstudent = rep;
+			console.log($scope.allstudent);
+			//$scope.average = parseInt(rep.score1)+parseInt(rep.score2)+parseInt(rep.score3);
+		
+	})
+	};
+	
+
+		
+
+	
 	$scope.logout = function(){
 		$http.get('/logout')
 		.success(function(rep){
@@ -50,13 +117,44 @@ app.controller('homecontroller',['$scope','$window','$location','$http','$rootSc
 		})
 	};
 	
-	$scope.edit = function(){
-		$http.post('/edit',{"password":$scope.password})
+
+	
+
+}]);
+app.controller('editstudentcontroller',['$scope','$location','$http',function($scope,$location,$http) {
+	$scope.submit = function(){
+
+
+		var batch = $scope.batch;
+		var name = $scope.name;
+		var class1 = $scope.class1;
+		var score1 = $scope.score1;
+		var class2 = $scope.class2;
+		var score2 = $scope.score2;
+		var class3 = $scope.class3;
+		var score3 = $scope.score3;
+		var studentscore = {"name":name,"class1":class1,"score1":score1,"class2":class2,"score2":score2,"class3":class3,"score3":score3,"batch":batch};
+		$http.post('/editstudent',studentscore)
 		.success(function(rep){
+			//alert(rep.name);
+			    //console.log(rep);
+		        if(rep==='success'){
+		        	$location.path('/home');
+		        }
+		        else{
+		        	alert('update failed!');
+		        }
+
+				
 			
 		})
-	}
+	};
+}])
+
+app.controller('studentinfocontroller',['$scope','$location','$http','$rootScope',function($scope,$location,$http,$rootScope) {
+	//console.log($rootScope.student);
+	$scope.studentinfo = $rootScope.student;
+	//$scope.name = "chen";
+	//console.log($scope.studentinfo);
 	
-	
-	
-}]);
+}])
