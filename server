@@ -1,51 +1,42 @@
-
 var express = require('express');
 var app = express();
 var mongodb = require('mongodb');
 var http = require('http');
-
 var mongoclient = require('mongodb').MongoClient;
-
-
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var mongodbstore = require('connect-mongodb-session')(session);
-
-/*var new_db = new mongodb.Db('aa', new mongodb.Server('localhost', 27017));
-new_db.open(function(err, db){
-	if(!err){
-		db.collection("aaa").insert({"test":"2323"});
-	}
-})*/
-
-var conn_str = 'mongodb://localhost:27017/example';
+var conn_str = 'mongodb://localhost:27017/admin';
 app.use(express.static('assets'));
 app.use(bodyParser.json());
 var store = new mongodbstore({
-	uri:'mongodb://localhost:27017/example',
-	collection:'example_session'
+	uri:'mongodb://localhost:27017/admin',
+	collection:'admin_session'
 	});
+
 app.use(
 		session({
-			secret:'example_sess_secret_key',
-			cookie:{maxAge:1000*60*2}
+			secret:'test_sess_secret_key',
 			resave:true,
 			saveUninitialized:true,
 			store:store
 		})
 		);
+
 store.on('error',function(err){
 	console.log(err);
 });
+
 app.get('/',function(req,res){
 	res.sendFile(__dirname + "/index.html");
-})
+});
+
 app.post('/login',function(req,res){
 	mongoclient.connect(conn_str,function(err,db){
 		if(err){
 			console.log('error occur');
 		}else{
-			db.collection('users').findOne({"username":req.body.username,"password":req.body.password},function(err,result){
+			db.collection('adminer').findOne({"username":req.body.name,"password":req.body.password},function(err,result){
 				console.log(result);
 				if(result){
 					req.session.loguser = result;
@@ -60,10 +51,29 @@ app.post('/login',function(req,res){
 		}
 	})
 });
-app.get('/logout',function(req,res){
-	req.session.loguser=null;
-	res.send('successful');
-})
+
+app.post('/signup',function(req,res){
+	mongoclient.connect(conn_str,function(err,db){
+		if(err){
+			console.log('error occur');
+		}else{
+			db.collection('adminer').findOne({"username":req.body.name},function(err,result){
+				console.log(result);
+				if(result){
+					
+					res.send('student exists!');
+					
+				}else{
+					db.collection('adminer').insert({"username":req.body.name,"password":req.body.password});
+					res.send('success');
+				}
+				db.close();
+			})
+			
+		}
+	})
+});
+
 app.get('/isloggedin',function(req,res){
 	if(req.session.loguser!=null){
 		res.send(req.session.loguser);
@@ -71,22 +81,109 @@ app.get('/isloggedin',function(req,res){
 		res.send(false);
 	}
 	
+});
+
+app.get('/logout',function(req,res){
+	req.session.loguser=null;
+	res.send('successful');
 })
 
-app.post('/edit',function(req,res){
+app.post('/allinfo',function(req,res){
 	mongoclient.connect(conn_str,function(err,db){
 		if(err){
 			console.log('error occur');
 		}else{
-			db.collection('users').update({"username":req.session.loguser.username,"password":req.session.loguser.password},{$set:{"password":req.body.password}},function(err,result){
-	
-				
+			db.collection('students').find({"batch":req.body.batch}).toArray(function(err, result){
+				if(result){
+					console.log(result);
+					//req.session.allstudents = result;
+					res.send(result);
+					
+				}else{
+					res.send('failed');
+				}
 				db.close();
 			})
 			
 		}
 	})
-})
-app.listen(8080,function(){
-	console.log('server running @ localhost:8080');
-})
+});
+app.post('/addstudent',function(req,res){
+	mongoclient.connect(conn_str,function(err,db){
+		if(err){
+			console.log('error occur');
+		}else{
+			db.collection('students').findOne({"name":req.body.name},function(err,result){
+				
+				if(result){
+				 res.send('student already exsit!')
+					
+				}else{
+					db.collection('students').insert({"name":req.body.name,"batch":req.body.batch,"score1":0,"score2":0,"score3":0,});
+					res.send('added');
+				}
+				
+			})
+			
+			db.collection('studentinfo').findOne({"name":req.body.name},function(err,result){
+				
+				if(result){
+				 res.send('student already exsit!')
+					
+				}else{
+					db.collection('studentinfo').insert({"name":req.body.name,"class1":'',"score1":0,"class2":'',"score2":0,"class3":'',"score3":0});
+					//res.send('added');
+				}
+				db.close();
+			})
+			
+			
+		}
+	})
+});
+
+app.post('/studentinfo',function(req,res){
+	mongoclient.connect(conn_str,function(err,db){
+		if(err){
+			console.log('error occur');
+		}else{
+			db.collection('studentinfo').findOne({"name":req.body.name},function(err,result){
+				console.log(result);
+				res.send(result);
+					
+				
+				
+			})
+			
+			
+		}
+	})
+});
+
+app.post('/editstudent',function(req,res){
+	mongoclient.connect(conn_str,function(err,db){
+		if(err){
+			console.log('error occur');
+		}else{
+			db.collection('students').insert({"name":req.body.name,"batch":req.body.batch,"class1":req.body.class1,"score1":req.body.score1,"class2":req.body.class2,"score2":req.body.score2,"class3":req.body.class3,"score3":req.body.score3});
+			db.collection('studentinfo').insert({"name":req.body.name,"batch":req.body.batch,"class1":req.body.class1,"score1":req.body.score1,"class2":req.body.class2,"score2":req.body.score2,"class3":req.body.class3,"score3":req.body.score3});
+			res.send('success');
+			/*db.collection('studentinfo').update({"name":req.body.name},{$set:{"class1":req.body.class1,"score1":req.body.score1,"class2":req.body.class2,"score2":req.body.score2,"class3":req.body.class3,"score3":req.body.score3}},function(err,result){
+	            console.log(result);
+	          db.collection('students').update({"name":req.body.name},{$set:{"score1":req.body.score1,"score2":req.body.score2,"score3":req.body.score3}},function(err,result){
+		            console.log(result);
+					res.send('success');*/
+					
+					db.close();
+				}
+				
+			})
+			
+			
+		
+});
+
+
+app.listen(9109,function(){
+	console.log('server running @ localhost:9109');
+});
