@@ -1,0 +1,40 @@
+<form class="col-lg-12 clo-md-12" style="text-align:center">
+<div id='add'>
+<input type='text' ng-model='name' placeholder='name'/>
+<select id='batch' ng-model='batch'>
+  <option value='javascript'>javascript</option>
+  <option value='php'>php</option>
+  <option value='java'>java</option>
+</select><br/>
+
+
+</div>
+
+<!-- <input type='test' placeholder='studentname' ng-model='name' class="form-control"/> -->
+<select id='batch' ng-model='class1' style='width:100%'>
+  <option value='Math'>Math</option>
+  <option value='English'>English</option>
+  <option value='XML'>XML</option>
+  <option value='Gym'>Gym</option>
+  <option value='Pyhon'>Pyhon</option>
+  
+</select></br>
+<input type='test' placeholder='score' ng-model='score1' class="form-control"/>
+<select id='batch' ng-model='class2' style='width:100%'>
+  <option value='Math'>Math</option>
+  <option value='English'>English</option>
+  <option value='XML'>XML</option>
+  <option value='Gym'>Gym</option>
+  <option value='Pyhon'>Pyhon</option>
+</select></br>
+<input type='test' placeholder='score' ng-model='score2' class="form-control"/>
+<select id='batch' ng-model='class3' style='width:100%'>
+  <option value='Math'>Math</option>
+  <option value='English'>English</option>
+  <option value='XML'>XML</option>
+  <option value='Gym'>Gym</option>
+  <option value='Pyhon'>Pyhon</option>
+</select></br>
+<input type='test' placeholder='score' ng-model='score3' class="form-control"/>
+<input type='button' value='submit' ng-click='submit()' class="btn btn-success"/>
+</form>
