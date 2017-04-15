@@ -1,0 +1,5 @@
+<form class="col-lg-12 clo-md-12" style="text-align:center">
+<input type='text' placeholder='name' ng-model='name' class="form-control"/></br>
+<input type='password' placeholder='password' ng-model='password' class="form-control"/></br>
+<input type='button' ng-click='signup()' value='signup' class="btn btn-success"/>
+</form>
