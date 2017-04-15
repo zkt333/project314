@@ -1,0 +1,25 @@
+<table class='table'>
+<thead>
+<tr>
+<td>name</td>
+<td>class1</td>
+<td>score</td>
+<td>class2</td>
+<td>score</td>
+<td>class3</td>
+<td>socre</td>
+</tr>
+</thead>
+<tr>
+<td>{{studentinfo.name}}</td>
+<td>{{studentinfo.class1}}</td>
+<td>{{studentinfo.score1}}</td>
+<td>{{studentinfo.class2}}</td>
+<td>{{studentinfo.score2}}</td>
+<td>{{studentinfo.class3}}</td>
+<td>{{studentinfo.score3}}</td>
+</tr>
+
+
+</table><br/>
+<a href='#/home'>Back</a>
